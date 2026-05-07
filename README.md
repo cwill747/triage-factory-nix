@@ -41,6 +41,31 @@ Add this flake as an input in your own `flake.nix`:
 }
 ```
 
+## Binary cache (Cachix)
+
+Prebuilt binaries are pushed to [`triage-factory.cachix.org`](https://triage-factory.cachix.org) by CI on every push to `main`. Configure your machine to pull from it and avoid local rebuilds:
+
+```bash
+# One-time setup
+cachix use triage-factory
+```
+
+Or, configure it directly in `nix.conf` / `/etc/nix/nix.conf`:
+
+```
+substituters = https://cache.nixos.org https://triage-factory.cachix.org
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= triage-factory.cachix.org-1:BcpRtKUQM7KQgT9tAaFF1a9H8qSSM5vfL8UU8HdZlOA=
+```
+
+For NixOS / nix-darwin / Home Manager:
+
+```nix
+nix.settings = {
+  substituters = [ "https://triage-factory.cachix.org" ];
+  trusted-public-keys = [ "triage-factory.cachix.org-1:BcpRtKUQM7KQgT9tAaFF1a9H8qSSM5vfL8UU8HdZlOA=" ];
+};
+```
+
 ## Supported platforms
 
 - `x86_64-linux`
