@@ -9,6 +9,15 @@ extract_hash() {
   grep "got:" <<< "$1" | head -1 | awk '{print $2}'
 }
 
+# Portable in-place sed (macOS needs -i '', GNU needs -i)
+sedi() {
+  if sed --version 2>/dev/null | grep -q GNU; then
+    sed -i "$@"
+  else
+    sed -i '' "$@"
+  fi
+}
+
 # Get latest release tag, or use the one passed as $1
 if [[ ${1:-} ]]; then
   version="${1#v}"
@@ -27,10 +36,10 @@ src_sri=$(nix hash convert --hash-algo sha256 --to sri "$src_hash")
 echo "    src: ${src_sri}"
 
 # 2. Write version + source hash, zero out dep hashes so nix tells us the real ones
-sed -i '' "s|version = \".*\";|version = \"${version}\";|" "$FLAKE"
-sed -i '' "s|hash = \"sha256-.*\";|hash = \"${src_sri}\";|" "$FLAKE"
-sed -i '' "s|npmDepsHash = \"sha256-.*\";|npmDepsHash = \"${FAKE_HASH}\";|" "$FLAKE"
-sed -i '' "s|vendorHash = \"sha256-.*\";|vendorHash = \"${FAKE_HASH}\";|" "$FLAKE"
+sedi "s|version = \".*\";|version = \"${version}\";|" "$FLAKE"
+sedi "s|hash = \"sha256-.*\";|hash = \"${src_sri}\";|" "$FLAKE"
+sedi "s|npmDepsHash = \"sha256-.*\";|npmDepsHash = \"${FAKE_HASH}\";|" "$FLAKE"
+sedi "s|vendorHash = \"sha256-.*\";|vendorHash = \"${FAKE_HASH}\";|" "$FLAKE"
 
 # 3. npm deps hash — build will fail with hash mismatch, we extract the correct one
 echo "==> Computing npmDepsHash (this builds the frontend deps)..."
@@ -42,7 +51,7 @@ if [[ -z "$npm_hash" ]]; then
   exit 1
 fi
 echo "    npmDepsHash: ${npm_hash}"
-sed -i '' "s|npmDepsHash = \"${FAKE_HASH}\";|npmDepsHash = \"${npm_hash}\";|" "$FLAKE"
+sedi "s|npmDepsHash = \"${FAKE_HASH}\";|npmDepsHash = \"${npm_hash}\";|" "$FLAKE"
 
 # 4. Go vendor hash — same trick
 echo "==> Computing vendorHash (this fetches Go modules)..."
@@ -54,7 +63,7 @@ if [[ -z "$vendor_hash" ]]; then
   exit 1
 fi
 echo "    vendorHash: ${vendor_hash}"
-sed -i '' "s|vendorHash = \"${FAKE_HASH}\";|vendorHash = \"${vendor_hash}\";|" "$FLAKE"
+sedi "s|vendorHash = \"${FAKE_HASH}\";|vendorHash = \"${vendor_hash}\";|" "$FLAKE"
 
 # 5. Full build to verify
 echo "==> Running full build..."
