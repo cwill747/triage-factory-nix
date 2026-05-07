@@ -1,0 +1,27 @@
+name: Build and cache
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: cachix/cachix-action@v15
+        with:
+          name: triage-factory
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build default package
+        run: nix build --print-build-logs .#default
