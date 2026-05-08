@@ -17,13 +17,13 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        version = "1.9.0";
+        version = "1.10.0";
 
         src = pkgs.fetchFromGitHub {
           owner = "sky-ai-eng";
           repo = "triage-factory";
           tag = "v${version}";
-          hash = "sha256-5YE+/VmMs9JSK17oKEEkBl2ZVRqFYOwxAnYVNI2w5hI=";
+          hash = "sha256-2zs8Z99xsoQsliEwTlNmt1YT6dnIrLa7vic1vWjKBKo=";
         };
 
         frontend = pkgs.buildNpmPackage {
