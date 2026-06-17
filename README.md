@@ -6,10 +6,10 @@ Nix flake for building [Triage Factory](https://github.com/sky-ai-eng/triage-fac
 
 ```bash
 # Run without installing
-nix run github:cwill747/triage-factory-nix
+nix run "https://flakehub.com/f/cwill747/triage-factory/*.tar.gz"
 
 # Install to profile
-nix profile install github:cwill747/triage-factory-nix
+nix profile install "https://flakehub.com/f/cwill747/triage-factory/*.tar.gz"
 ```
 
 ## Use as a flake input
@@ -20,7 +20,7 @@ Add this flake as an input in your own `flake.nix`:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    triage-factory.url = "github:cwill747/triage-factory-nix";
+    triage-factory.url = "https://flakehub.com/f/cwill747/triage-factory/*.tar.gz";
   };
 
   outputs = { nixpkgs, triage-factory, ... }:
@@ -41,30 +41,9 @@ Add this flake as an input in your own `flake.nix`:
 }
 ```
 
-## Binary cache (Cachix)
+## Binary cache (FlakeHub)
 
-Prebuilt binaries are pushed to [`triage-factory.cachix.org`](https://triage-factory.cachix.org) by CI on every push to `main`. Configure your machine to pull from it and avoid local rebuilds:
-
-```bash
-# One-time setup
-cachix use triage-factory
-```
-
-Or, configure it directly in `nix.conf` / `/etc/nix/nix.conf`:
-
-```
-substituters = https://cache.nixos.org https://triage-factory.cachix.org
-trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= triage-factory.cachix.org-1:BcpRtKUQM7KQgT9tAaFF1a9H8qSSM5vfL8UU8HdZlOA=
-```
-
-For NixOS / nix-darwin / Home Manager:
-
-```nix
-nix.settings = {
-  substituters = [ "https://triage-factory.cachix.org" ];
-  trusted-public-keys = [ "triage-factory.cachix.org-1:BcpRtKUQM7KQgT9tAaFF1a9H8qSSM5vfL8UU8HdZlOA=" ];
-};
-```
+Tagged releases are published to [FlakeHub](https://flakehub.com/flake/cwill747/triage-factory), and CI builds are cached via FlakeHub Cache. Installing from the FlakeHub flake URL above pulls prebuilt binaries automatically — no extra substituter configuration required.
 
 ## Supported platforms
 
