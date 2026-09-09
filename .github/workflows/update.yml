@@ -48,6 +48,10 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Update flake inputs
+        if: steps.check.outputs.skip == 'false'
+        run: nix flake update
+
       - name: Run update script
         if: steps.check.outputs.skip == 'false'
         run: ./update.sh "v${{ steps.target.outputs.version }}"

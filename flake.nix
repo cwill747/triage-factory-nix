@@ -17,21 +17,45 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        version = "1.12.2";
+        version = "1.13.0";
 
         src = pkgs.fetchFromGitHub {
           owner = "sky-ai-eng";
           repo = "triage-factory";
           tag = "v${version}";
-          hash = "sha256-mzpb7NNLeEm/YopkHV2aiOczyh83KivXsDTT9LR4Wjg=";
+          hash = "sha256-yJbvpXdH/mWG+Hz7B06LjyYQQxBfqDtWO075EfnE0w0=";
         };
 
-        frontend = pkgs.buildNpmPackage {
+        pnpmDepsHash = "sha256-t0GfXdUBz9xbuqTVN9iRRR3EmvNr8khtX0AP6BV9THU=";
+
+        frontend = pkgs.stdenvNoCC.mkDerivation {
           pname = "triage-factory-frontend";
           inherit version;
-          src = "${src}/frontend";
-          npmDepsHash = "sha256-Jl+3dIOQDsm+ZTze3Rv8+udGPCInQTQmMm6hZGAur+0=";
+          inherit src;
+          sourceRoot = "${src.name}/frontend";
+
+          pnpmDeps = pkgs.fetchPnpmDeps {
+            pname = "triage-factory-frontend";
+            inherit version src;
+            sourceRoot = "${src.name}/frontend";
+            hash = pnpmDepsHash;
+            fetcherVersion = 4;
+          };
+
+          nativeBuildInputs = [
+            pkgs.nodejs
+            pkgs.pnpm
+            pkgs.pnpmConfigHook
+          ];
+
           NODE_OPTIONS = "--max-old-space-size=4096";
+
+          buildPhase = ''
+            runHook preBuild
+            pnpm build
+            runHook postBuild
+          '';
+
           installPhase = ''
             runHook preInstall
             mkdir -p $out
@@ -41,45 +65,49 @@
         };
       in
       {
-        packages.default = pkgs.buildGoModule {
-          pname = "triagefactory";
-          inherit version src;
-          vendorHash = "sha256-17MiDYIwqbXa1GWe2ksNMkYhhs2SIw5QfLWV9IyYl4E=";
+        packages = {
+          inherit frontend;
 
-          ldflags = [
-            "-s"
-            "-w"
-            "-X main.Version=v${version}"
-          ];
+          default = pkgs.buildGoModule {
+            pname = "triagefactory";
+            inherit version src;
+            vendorHash = "sha256-fLQSLnbdwLGyvmtxHgdIAKk6ZNQD5XUPYuO3NVZY8ZQ=";
 
-          nativeCheckInputs = [ pkgs.git ];
+            ldflags = [
+              "-s"
+              "-w"
+              "-X main.Version=v${version}"
+            ];
 
-          checkFlags =
-            let
-              skippedTests = [
-                "TestImport_RoundTripSessionTreeAndCompactions"
-              ];
-            in
-            [ "-run" "^(?!${builtins.concatStringsSep "|" skippedTests}$)" ];
+            nativeCheckInputs = [ pkgs.git ];
 
-          preCheck = ''
-            export HOME=$(mktemp -d)
-            git config --global user.email "test@test.com"
-            git config --global user.name "Test"
-          '';
+            checkFlags =
+              let
+                skippedTests = [
+                  "TestImport_RoundTripSessionTreeAndCompactions"
+                ];
+              in
+              [ "-run" "^(?!${builtins.concatStringsSep "|" skippedTests}$)" ];
 
-          preBuild = ''
-            mkdir -p frontend/dist
-            cp -r ${frontend}/* frontend/dist/
-          '';
+            preCheck = ''
+              export HOME=$(mktemp -d)
+              git config --global user.email "test@test.com"
+              git config --global user.name "Test"
+            '';
 
-          postInstall = ''
-            mv $out/bin/triage-factory $out/bin/triagefactory
-          '';
+            preBuild = ''
+              mkdir -p frontend/dist
+              cp -r ${frontend}/* frontend/dist/
+            '';
 
-          meta = {
-            description = "AI-powered issue triage";
-            mainProgram = "triagefactory";
+            postInstall = ''
+              mv $out/bin/triage-factory $out/bin/triagefactory
+            '';
+
+            meta = {
+              description = "AI-powered issue triage";
+              mainProgram = "triagefactory";
+            };
           };
         };
 
