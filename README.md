@@ -62,7 +62,7 @@ Tagged releases are published to [FlakeHub](https://flakehub.com/flake/cwill747/
 ./update.sh v1.8.0
 ```
 
-This fetches the source tarball, computes all three Nix hashes (source, npm deps, Go modules), updates `flake.nix`, and runs a verification build.
+This fetches the source tarball, computes all three Nix hashes (source, pnpm dependencies, and Go modules), updates `flake.nix`, and runs a verification build.
 
 A GitHub Action is also available — trigger the **Update to latest release** workflow manually from the Actions tab to open a PR with the version bump automatically.
 
