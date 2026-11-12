@@ -17,16 +17,16 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        version = "1.17.0";
+        version = "1.18.2";
 
         src = pkgs.fetchFromGitHub {
           owner = "sky-ai-eng";
           repo = "triage-factory";
           tag = "v${version}";
-          hash = "sha256-05g6OY3L252xF8s8KLcHcZ/nQxDvX68JqQRluv7OUSw=";
+          hash = "sha256-OxaTFqPIDJyz2+1nMtH5DbrSXrahiURhrVqXscodHgw=";
         };
 
-        pnpmDepsHash = "sha256-5nQ+IyJ6KhoPpv9JQnFDJIEHvcfX5uN040xFcxfcZD0=";
+        pnpmDepsHash = "sha256-cWMgW20aENEygJ07Q7EKMzv1optv9h0CSLdxnVqwCsE=";
 
         frontend = pkgs.stdenvNoCC.mkDerivation {
           pname = "triage-factory-frontend";
@@ -71,7 +71,7 @@
           default = pkgs.buildGoModule {
             pname = "triagefactory";
             inherit version src;
-            vendorHash = "sha256-+rK+yrsJyzFO4A20vHj66alx7Z1FXFTRK11zouwlvs8=";
+            vendorHash = "sha256-UhXYnfuegpXRnAeu2AGUTApZJK2+HozO9enbJFeSF8M=";
 
             # Build only the root package (the CLI). The repo now ships a
             # nested Go module under e2e/ whose `fakes` program is not part of
