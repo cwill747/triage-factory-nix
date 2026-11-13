@@ -49,7 +49,6 @@ Tagged releases are published to [FlakeHub](https://flakehub.com/flake/cwill747/
 
 - `x86_64-linux`
 - `aarch64-linux`
-- `x86_64-darwin`
 - `aarch64-darwin`
 
 ## Updating to a new release
